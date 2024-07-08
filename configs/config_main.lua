@@ -13,8 +13,7 @@ depot = {
     sell = {zone = vector4(37.3948, -1288.4828, 28.2922, 291.4622), ped = 'a_m_m_soucent_02', scenario = 'WORLD_HUMAN_STAND_MOBILE'},
 
     blip = { sprite = 728, color = 2, size = 1.0 },
-    outside = { zone = vector3(36.3291, -1283.9606, 29.2956), 
-        h = 89.5190, 
+    outside = { zone = vector4(36.3291, -1283.9606, 29.2956, 89.5190), 
         minZ = 2.5, 
         maxZ = 4.5
     }, 
