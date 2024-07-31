@@ -32,7 +32,7 @@ end
 function spawnBin()
     local binModel = GetHashKey(depot.bin.prop)
     local loc = depot.bin.placement
-    lib.requestModel(binModel, 500)
+    lib.requestModel(binModel, 10000)
     local binObject = CreateObject(binModel, loc.x, loc.y, loc.z, false, true, false)
     SetEntityHeading(binObject, loc.w)
     FreezeEntityPosition(binObject, true)
@@ -52,6 +52,7 @@ function spawnBin()
 end
 
 Citizen.CreateThread(function()
+    spawnNPC()
     spawnProps()
     createBlip(depot)
     spawnBin()
@@ -69,39 +70,19 @@ function spawnNPC()
     local npcConfigs = { depot.npc, depot.sell }
     for _, npcData in pairs(npcConfigs) do
         local pedModel = GetHashKey(npcData.ped)
-        lib.requestModel(pedModel, 500)
+        lib.requestModel(pedModel, 10000)
         local npc = CreatePed(4, pedModel, npcData.zone.x, npcData.zone.y, npcData.zone.z, npcData.zone.w, false, true)
         TaskStartScenarioInPlace(npc, npcData.scenario, 0, true)
         SetBlockingOfNonTemporaryEvents(npc, true)
         SetEntityInvincible(npc, true)
         FreezeEntityPosition(npc, true)
-        
         table.insert(spawnedNPCs, npc)
     end
 end
 
-Citizen.CreateThread(function()
-    spawnNPC()
-    exports['qb-target']:AddTargetModel(GetHashKey(depot.npc.ped), {
-        options = {
-            { type = "client", event = "vhs-recycle:interactNPC", icon = 'fas fa-hand', label = 'Open Recycle Menu',
-                canInteract = function(entity, distance, data)
-                    return IsPedAPlayer(entity) == false
-                end
-            }
-        }, distance = 2.5
-    })
-    exports['qb-target']:AddTargetModel(GetHashKey(depot.sell.ped), {
-        options = {
-            { type = "client", event = "vhs-recycle:interactsell", icon = 'fas fa-hand', label = 'Sell Items',
-                canInteract = function(entity, distance, data)
-                    return IsPedAPlayer(entity) == false
-                end
-            }
-        }, distance = 2.5
-    })
-end)
 
+exports['qb-target']:AddTargetModel(GetHashKey(depot.npc.ped), { options = { { type = "client", event = "vhs-recycle:interactNPC", icon = 'fas fa-hand', label = 'Open Recycle Menu', canInteract = function(entity, distance, data) return IsPedAPlayer(entity) == false end } }, distance = 2.5 })
+exports['qb-target']:AddTargetModel(GetHashKey(depot.sell.ped), { options = { { type = "client", event = "vhs-recycle:interactsell", icon = 'fas fa-hand', label = 'Sell Items', canInteract = function(entity, distance, data) return IsPedAPlayer(entity) == false end } }, distance = 2.5 })
 exports['qb-target']:AddBoxZone("outside", depot.outside.zone, 3, 5, { name = "outside", heading = depot.outside.h, debugPoly = false, minZ = depot.outside.minZ, maxZ = depot.outside.maxZ, }, { options = { { event = "vhs-recycle:enter", icon = 'fas fa-door-open', label = 'Enter Depot', }, }, distance = 1.5 })
 exports['qb-target']:AddBoxZone("exit", depot.exit.zone, 1, 1.3, { name = "exit", heading = depot.exit.h, debugPoly = false, minZ = depot.exit.minZ, maxZ = depot.exit.maxZ,}, { options = { { event = "vhs-recycle:exit", icon = 'fas fa-door-open', label = 'Exit Warehouse', }, },distance = 1.5 })
 exports['qb-target']:AddBoxZone("duty", depot.duty.zone, 1, 1, { name = "duty", heading = depot.duty.h, debugPoly = false, minZ = depot.duty.minZ, maxZ = depot.duty.maxZ,},{ options = { { event = "vhs-recycle:start", label = 'Start Working', }, }, distance = 1.5 })
@@ -134,22 +115,10 @@ RegisterNetEvent('vhs-recycle:start')
 AddEventHandler('vhs-recycle:start', function()
     for _, propData in pairs(props) do
         if DoesEntityExist(propData.object) then
-            local propModel = GetHashKey(propData.prop)
-            exports['qb-target']:AddTargetModel(propModel, {
+            local model = GetHashKey(propData.prop)
+            exports['qb-target']:AddTargetModel(model, {
                 options = {
-                    {
-                        type = "client",
-                        event = "vhs-recycle:interact",
-                        icon = 'fas fa-hand',
-                        label = 'Take Items',
-                        canInteract = function(entity, distance, data)
-                            if IsEntityAnObject(entity) and carriedProp == nil then
-                                return true
-                            end
-                            return false
-                        end
-                    }
-                },
+                    { type = "client", event = "vhs-recycle:interact", icon = 'fas fa-hand', label = 'Take Items', canInteract = function(entity, distance, data) if IsEntityAnObject(entity) and carriedProp == nil then return true end return false end } },
                 distance = 2.5
             })
         end
@@ -161,7 +130,7 @@ AddEventHandler('vhs-recycle:interact', function()
     local playerPed = PlayerPedId()
     local propPlacement = { vector3(0.025000, 0.080000, 0.255000), vector3(-145.000000, 290.000000, 0.000000) }
     lib.requestAnimDict('anim@heists@box_carry@', 500)
-    lib.requestModel('hei_prop_heist_box', 500)
+    lib.requestModel('hei_prop_heist_box', 10000)
     TaskPlayAnim(playerPed, 'anim@heists@box_carry@', 'idle', 8.0, -8.0, -1, 50, 0, false, false, false)
     carriedProp = CreateObject(GetHashKey('hei_prop_heist_box'), 0, 0, 0, true, true, true)
     AttachEntityToEntity(carriedProp, playerPed, GetPedBoneIndex(playerPed, 60309), propPlacement[1].x, propPlacement[1].y, propPlacement[1].z, propPlacement[2].x, propPlacement[2].y, propPlacement[2].z, true, true, false, true, 1, true)
@@ -173,20 +142,8 @@ AddEventHandler('vhs-recycle:interactNPC', function()
         id = 'npc_menu',
         title = '♻️ **Recycling Items**',
         options = {
-          {
-            title = 'Process Items (5x)',
-            description = 'Process recycled 5x products',
-            icon = 'recycle',
-            event = 'vhs-recycle:iteemz',
-            args = { amountToAdd = 5 } 
-          }, 
-          {
-            title = 'Process Items (10x)',
-            description = 'Process recycled 10x products',
-            icon = 'recycle',
-            event = 'vhs-recycle:iteemz',
-            args = { amountToAdd = 10 } 
-          }
+          { title = 'Process Items (5x)', description = 'Process recycled 5x products', icon = 'recycle', event = 'vhs-recycle:iteemz', args = { amountToAdd = 5 }  }, 
+          { title = 'Process Items (10x)', description = 'Process recycled 10x products', icon = 'recycle', event = 'vhs-recycle:iteemz', args = { amountToAdd = 10 } }
         }
     })
     lib.showContext('npc_menu')
