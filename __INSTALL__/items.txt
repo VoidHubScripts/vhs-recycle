@@ -1,0 +1,17 @@
+## ESX STANDALONE 
+
+INSERT INTO `items` (`name`, `label`, `weight`, `rare`, `can_remove`) VALUES
+	('recycle', 'Recycled Goods', 2, 0, 1);
+
+## OX_INVENTORY 
+
+['recycle'] = {
+    label = 'Recycled Goods',
+    weight = 250,
+    stack = true,
+},
+
+## QBCore
+
+["recycle"] = {["name"] = "recycle", ["label"] = "Recycled Goods", ["weight"] = 250, ["type"] = "item", ["image"] = "recycle.png", ["unique"] = false, ["useable"] = false, ["shouldClose"] = true, ["combinable"] = nil, ["description"] = ""},
+

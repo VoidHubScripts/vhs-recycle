@@ -141,10 +141,7 @@ AddEventHandler('vhs-recycle:interactNPC', function()
     lib.registerContext({
         id = 'npc_menu',
         title = '♻️ **Recycling Items**',
-        options = {
-          { title = 'Process Items (5x)', description = 'Process recycled 5x products', icon = 'recycle', event = 'vhs-recycle:iteemz', args = { amountToAdd = 5 }  }, 
-          { title = 'Process Items (10x)', description = 'Process recycled 10x products', icon = 'recycle', event = 'vhs-recycle:iteemz', args = { amountToAdd = 10 } }
-        }
+        options = { { title = 'Process Items (5x)', description = 'Process recycled 5x products', icon = 'recycle', event = 'vhs-recycle:iteemz', args = { amountToAdd = 5 }  },  { title = 'Process Items (10x)', description = 'Process recycled 10x products', icon = 'recycle', event = 'vhs-recycle:iteemz', args = { amountToAdd = 10 } } }
     })
     lib.showContext('npc_menu')
 end)
@@ -160,9 +157,10 @@ end)
 
 RegisterNetEvent('vhs-recycle:iteemz')
 AddEventHandler('vhs-recycle:iteemz', function(data)
+    local playerPed = PlayerPedId()
     local amountToAdd = data.amountToAdd
-    lib.requestAnimDict('amb@prop_human_bum_bin@idle_a', 500)
-    TaskPlayAnim(playerPed, 'mini@repair', 'fixing_a_ped', 8.0, -8.0, -1, 50, 0, false, false, false)
+    lib.requestAnimDict('misscarsteal4@actor', 500)
+    TaskPlayAnim(playerPed, 'misscarsteal4@actor', 'actor_berating_loop', 8.0, -8.0, -1, 50, 0, false, false, false)
     ProgressBar(5000, 'Processing Items')
     local giveitems = lib.callback.await('vhs-recycle:giveitems', false, amountToAdd)
     ClearPedTasksImmediately(playerPed)

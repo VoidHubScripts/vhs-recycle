@@ -1,12 +1,7 @@
-if Framework == 'esx' then
-    ESX = exports["es_extended"]:getSharedObject()
-else
-    QBCore = exports['qb-core']:GetCoreObject()
-end
+if Framework == 'esx' then ESX = exports["es_extended"]:getSharedObject() else QBCore = exports['qb-core']:GetCoreObject() end
 
 function logDiscord(title, message, color)
-    local data = { username = "vh-fishing", avatar_url = "https://i.imgur.com/E2Z3mDO.png", embeds = { { ["color"] = color, ["title"] = title, ["description"] = message, ["footer"] = { ["text"] = "Installation Support - [ESX, QBCore Qbox] -  https://discord.gg/CBSSMpmqrK" },} }}
-    PerformHttpRequest(WebhookConfig.URL, function(err, text, headers) end, 'POST', json.encode(data), {['Content-Type'] = 'application/json'})
+    local data = { username = "vh-fishing", avatar_url = "https://i.imgur.com/E2Z3mDO.png", embeds = { { ["color"] = color, ["title"] = title, ["description"] = message, ["footer"] = { ["text"] = "Installation Support - [ESX, QBCore Qbox] -  https://discord.gg/CBSSMpmqrK" },} }} PerformHttpRequest(WebhookConfig.URL, function(err, text, headers) end, 'POST', json.encode(data), {['Content-Type'] = 'application/json'})
 end
 
 lib.callback.register('vhs-recycle:processing', function(source)
@@ -19,12 +14,7 @@ lib.callback.register('vhs-recycle:sellmenu', function(source)
     local src = source
     local menuOptions = {}
     for itemName, itemPrice in pairs(items) do
-        table.insert(menuOptions, {
-            title = GetItemLabel(itemName) .. " ($" .. itemPrice .. ")",
-            icon = InventoryImagePath .. itemName .. ".png", 
-            event = 'vhs-recycle:sellamount',
-            args = { item = itemName, price = itemPrice }
-        })
+        table.insert(menuOptions, { title = GetItemLabel(itemName) .. " ($" .. itemPrice .. ")", icon = InventoryImagePath .. itemName .. ".png",  event = 'vhs-recycle:sellamount', args = { item = itemName, price = itemPrice } })
     end
     return menuOptions
 end)
@@ -33,7 +23,7 @@ end)
 lib.callback.register('vhs-recycle:sellItem', function(source, data)
     local xPlayer = GetPlayerData(source)
     if not xPlayer then  
-        Notify("info", "Player Not Found", "", source) 
+        Notify("info", "Player Not Found", source) 
         return false 
     end
     local item = GetInventoryItem(source, data.item)
@@ -51,18 +41,24 @@ lib.callback.register('vhs-recycle:sellItem', function(source, data)
     end
 end)
 
-lib.callback.register('vhs-recycle:giveitems', function(source, amountToAdd)
+lib.callback.register('vhs-recycle:giveitems', function(source, amount)
     local src = source
     local recycleItem = GetInventoryItem(src, 'recycle')
-    if recycleItem.count >= amountToAdd then 
-        RemoveItem(src, 'recycle', amountToAdd)
-        for i = 1, amountToAdd do
-            local itemsGiven = 0
-            while itemsGiven < giveItemAmount do
-                local randomItem = getRandomItemFromConfig()
-                AddItem(src, randomItem, 1)
-                itemsGiven = itemsGiven + 1
+    if recycleItem.count >= amount then 
+        RemoveItem(src, 'recycle', amount)
+        local itemsAdd = {}
+        for i = 1, amount do
+            for j = 1, giveItemAmount do
+                local randomItem = getRandomItem()
+                if itemsAdd[randomItem] then
+                    itemsAdd[randomItem] = itemsAdd[randomItem] + 1
+                else
+                    itemsAdd[randomItem] = 1
+                end
             end
+        end
+        for item, count in pairs(itemsAdd) do
+            AddItem(src, item, count)
         end
         return true
     else
@@ -70,7 +66,7 @@ lib.callback.register('vhs-recycle:giveitems', function(source, amountToAdd)
     end
 end)
 
-function getRandomItemFromConfig()
+function getRandomItem()
     local keys = {}
     for key in pairs(items) do
         table.insert(keys, key)

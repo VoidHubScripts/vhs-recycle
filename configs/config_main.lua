@@ -11,6 +11,7 @@ items = {steel = 5, rubber = 3, metalscrap = 6, plastic = 3, copper = 10, fabric
 depot = {
     npc = {zone = vector4(1090.5276, -3103.3540, -39.9999, 357.3629), ped = 'a_m_m_farmer_01', scenario = 'WORLD_HUMAN_CLIPBOARD_FACILITY'}, 
     sell = {zone = vector4(37.3948, -1288.4828, 28.2922, 291.4622), ped = 'a_m_m_soucent_02', scenario = 'WORLD_HUMAN_STAND_MOBILE'},
+    bin = {prop = 'prop_recyclebin_05_a', placement = vector4(1096.2809, -3102.6228, -39.9999, 178.2123)},
 
     blip = { sprite = 728, color = 2, size = 1.0 },
     outside = { zone = vector4(36.3291, -1283.9606, 29.2956, 89.5190), 
@@ -31,8 +32,8 @@ depot = {
         minZ = 1.5, 
         maxZ = 2.0
     },
-    bin = {prop = 'prop_recyclebin_05_a', placement = vector4(1096.2809, -3102.6228, -39.9999, 178.2123)},
 }
+
 
 props = { 
     prop1 = { prop = 'sm_prop_smug_crate_l_fake', loc = vector4(1088.7007, -3096.2437, -40.0000, 1.8227) }, 

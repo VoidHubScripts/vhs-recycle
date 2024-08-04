@@ -2,6 +2,10 @@ fx_version 'cerulean'
 game 'gta5'
 lua54 'yes'
 
+description "vhs-recycle - [ESX, Qbox, QBCore] Free Support: discord.gg/CBSSMpmqrK"
+author "VoidHubScripts"
+version '1.2'
+
 
 client_scripts {
     'configs/config_main.lua',
@@ -17,7 +21,6 @@ client_scripts {
    
   shared_scripts {
     '@ox_lib/init.lua',
-    'configs/locales.lua',
     'configs/config_main.lua',
     'configs/utils.lua',
   }
