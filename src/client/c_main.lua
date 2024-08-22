@@ -188,7 +188,6 @@ function targetModel(model, name, event, icon, label, item, action, interact, jo
         end,
     }
     if event then
-        print(event)
         targetOptions.event = event
     end
     if action then
