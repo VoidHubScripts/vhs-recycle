@@ -38,17 +38,9 @@ function spawnBin()
     FreezeEntityPosition(binObject, true)
     depot.bin.object = binObject
     table.insert(spawnedProps, binObject)
-    exports['qb-target']:AddTargetModel(binModel, {
-        options = {
-            { type = "client", event = "vhs-recycle:process", icon = 'fas fa-trash-alt', label = 'Process Items',
-                canInteract = function(entity, distance, data)
-                    if IsEntityAnObject(entity) then
-                        return true
-                    end
-                    return false
-                end
-            }}, distance = 2.5 
-        })
+
+    targetModel(binModel, 'reecyclebin', 'vhs-recycle:process', 'fas fa-trash-alt', 'Process Items', item, nil, interact, job, gang, distance)
+    
 end
 
 Citizen.CreateThread(function()
@@ -80,13 +72,6 @@ function spawnNPC()
     end
 end
 
-
-exports['qb-target']:AddTargetModel(GetHashKey(depot.npc.ped), { options = { { type = "client", event = "vhs-recycle:interactNPC", icon = 'fas fa-hand', label = 'Open Recycle Menu', canInteract = function(entity, distance, data) return IsPedAPlayer(entity) == false end } }, distance = 2.5 })
-exports['qb-target']:AddTargetModel(GetHashKey(depot.sell.ped), { options = { { type = "client", event = "vhs-recycle:interactsell", icon = 'fas fa-hand', label = 'Sell Items', canInteract = function(entity, distance, data) return IsPedAPlayer(entity) == false end } }, distance = 2.5 })
-exports['qb-target']:AddBoxZone("outside", depot.outside.zone, 3, 5, { name = "outside", heading = depot.outside.h, debugPoly = false, minZ = depot.outside.minZ, maxZ = depot.outside.maxZ, }, { options = { { event = "vhs-recycle:enter", icon = 'fas fa-door-open', label = 'Enter Depot', }, }, distance = 1.5 })
-exports['qb-target']:AddBoxZone("exit", depot.exit.zone, 1, 1.3, { name = "exit", heading = depot.exit.h, debugPoly = false, minZ = depot.exit.minZ, maxZ = depot.exit.maxZ,}, { options = { { event = "vhs-recycle:exit", icon = 'fas fa-door-open', label = 'Exit Warehouse', }, },distance = 1.5 })
-exports['qb-target']:AddBoxZone("duty", depot.duty.zone, 1, 1, { name = "duty", heading = depot.duty.h, debugPoly = false, minZ = depot.duty.minZ, maxZ = depot.duty.maxZ,},{ options = { { event = "vhs-recycle:start", label = 'Start Working', }, }, distance = 1.5 })
-
 RegisterNetEvent('vhs-recycle:enter')
 AddEventHandler('vhs-recycle:enter', function()
     local ped = PlayerPedId()
@@ -111,19 +96,6 @@ AddEventHandler('vhs-recycle:exit', function()
     SetEntityHeading(ped, depot.outside.zone[4])
 end)
 
-RegisterNetEvent('vhs-recycle:start')
-AddEventHandler('vhs-recycle:start', function()
-    for _, propData in pairs(props) do
-        if DoesEntityExist(propData.object) then
-            local model = GetHashKey(propData.prop)
-            exports['qb-target']:AddTargetModel(model, {
-                options = {
-                    { type = "client", event = "vhs-recycle:interact", icon = 'fas fa-hand', label = 'Take Items', canInteract = function(entity, distance, data) if IsEntityAnObject(entity) and carriedProp == nil then return true end return false end } },
-                distance = 2.5
-            })
-        end
-    end
-end)
 
 RegisterNetEvent('vhs-recycle:interact')
 AddEventHandler('vhs-recycle:interact', function()
@@ -207,3 +179,111 @@ AddEventHandler('vhs-recycle:sellamount', function(data)
     end
     lib.callback.await('vhs-recycle:sellItem', 5000, { item = data.item, amount = quantity, price = data.price })
 end)
+
+
+function targetModel(model, name, event, icon, label, item, action, interact, job, gang, distance)
+    local targetOptions = { name = name, icon = icon, label = label, distance = distance, items = item, groups = job,
+        canInteract = function(entity, dist, coords, name, bone)
+            return type(interact) == "function" and interact(entity, dist, coords, name, bone) or true
+        end,
+    }
+    if event then
+        print(event)
+        targetOptions.event = event
+    end
+    if action then
+        targetOptions.onSelect = function(data)
+            if type(action) == "function" then
+                action(data)
+            end
+        end
+    end
+    if GetResourceState('ox_target') == 'started' then
+        exports.ox_target:addModel(model, { targetOptions })
+    elseif GetResourceState('qb-target') == 'started' then
+        local qbOptions = {
+            options = {{ event = event, icon = icon, label = label, item = item, job = job, gang = gang,
+                action = action and function(entity)
+                    if type(action) == "function" then
+                        action(entity)
+                    end
+                end or nil,
+                canInteract = function(entity, dist, data)
+                    return type(interact) == "function" and interact(entity, dist, data) or true
+                end
+            }},
+            distance = distance
+        }
+        if not action then
+            qbOptions.options[1].action = nil
+        end
+        if not event then
+            qbOptions.options[1].event = nil
+        end
+        exports['qb-target']:AddTargetModel(model, qbOptions)
+    else
+        print('Neither ox_target nor qb-target is started.')
+    end
+end
+
+function targetBox(name, coords, size, options, job, gang, distance, rotation, debug)
+    if GetResourceState('ox_target') == 'started' then
+        local oxSize = vector3(size[1], size[2], 2.0 + 9)
+        local oxOptions = { { name = name, coords = coords, size = oxSize, rotation = rotation or 0, debug = debug or false, distance = distance or 2.0, options = {} } }
+        for _, opt in ipairs(options) do
+            table.insert(oxOptions[1].options, { event = opt.event, icon = opt.icon, label = opt.label, items = opt.item, groups = job,
+                onSelect = function(data)
+                    if opt.action and type(opt.action) == "function" then
+                        opt.action(data)
+                    end
+                end,
+                canInteract = function(entity, dist, zoneCoords, zoneName, bone)
+                    if type(opt.canInteract) == "function" then
+                        return opt.canInteract(entity, dist, zoneCoords, zoneName, bone)
+                    end
+                    return true
+                end
+            })
+        end
+        exports.ox_target:addBoxZone(oxOptions[1])
+    elseif GetResourceState('qb-target') == 'started' then
+        local qbOptions = {}
+        for _, opt in ipairs(options) do
+            table.insert(qbOptions, { event = opt.event, icon = opt.icon, label = opt.label, item = opt.item, job = job or 'all', gang = gang,
+                action = function(entity)
+                    if opt.action and type(opt.action) == "function" then
+                        opt.action(entity)
+                    end
+                end,
+                canInteract = function(entity, dist, data)
+                    if type(opt.canInteract) == "function" then
+                        return opt.canInteract(entity, dist, data)
+                    end
+                    return true
+                end
+            })
+        end
+        exports['qb-target']:AddBoxZone(name, coords, size[1], size[2], { name = name, heading = rotation or 0, debugPoly = debug or false, minZ = coords.z - 1.0, maxZ = coords.z + 1.0, }, { options = qbOptions, distance = distance or 2.0 })
+    else
+        print('Neither ox_target nor qb-target is started.')
+    end
+end
+
+targetModel(depot.npc.ped, 'npc', 'vhs-recycle:interactNPC', 'fas fa-hand', 'Open Recycle Menu', item, nil, interact, job, gang, distance)
+targetModel(depot.sell.ped, 'sell', 'vhs-recycle:interactsell', 'fas fa-hand', 'Sell Items', nil, nil, interact,  job, gang, distance)
+
+targetBox('outside', depot.outside.zone, {3.5, 5.5}, { { icon = 'fas fa-door-open', label = 'Enter Depot',  action = function(entity) TriggerEvent('vhs-recycle:enter')  end }, }, job, gang, distance, rotation, false)
+targetBox('exit', depot.exit.zone, {1.5, 1.3}, { { icon = 'fas fa-door-open', label = 'Exit Warehouse',  action = function(entity) TriggerEvent('vhs-recycle:exit')  end }, }, job, gang, distance, rotation, false)
+targetBox('duty', depot.duty.zone, {1, 1}, { { icon = 'fas fa-door-open', label = 'Start Working',  action = function(entity) TriggerEvent('vhs-recycle:start')  end }, }, job, gang, distance, rotation, false)
+
+
+RegisterNetEvent('vhs-recycle:start')
+AddEventHandler('vhs-recycle:start', function()
+    for _, propData in pairs(props) do
+        if DoesEntityExist(propData.object) then
+            local model = GetHashKey(propData.prop)
+            targetModel(model, 'interact', 'vhs-recycle:interact', 'fas fa-hand', 'Take Items', nil, nil, interact,  job, gang, distance)
+        end
+    end
+end)
+
