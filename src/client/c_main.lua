@@ -281,7 +281,7 @@ AddEventHandler('vhs-recycle:start', function()
     for _, propData in pairs(props) do
         if DoesEntityExist(propData.object) then
             local model = GetHashKey(propData.prop)
-            targetModel(model, 'interact', 'vhs-recycle:interact', 'fas fa-hand', 'Take Items', nil, nil, interact,  job, gang, distance)
+            targetModel(model, 'interact', 'vhs-recycle:interact', 'fas fa-hand', 'Take Items', nil, nil, interact,  job, gang, 1.5)
         end
     end
 end)
