@@ -268,12 +268,12 @@ function targetBox(name, coords, size, options, job, gang, distance, rotation, d
     end
 end
 
-targetModel(depot.npc.ped, 'npc', 'vhs-recycle:interactNPC', 'fas fa-hand', 'Open Recycle Menu', item, nil, interact, job, gang, distance)
-targetModel(depot.sell.ped, 'sell', 'vhs-recycle:interactsell', 'fas fa-hand', 'Sell Items', nil, nil, interact,  job, gang, distance)
+targetModel(depot.npc.ped, 'npc', 'vhs-recycle:interactNPC', 'fas fa-hand', 'Open Recycle Menu', item, nil, interact, job, gang, 1.5)
+targetModel(depot.sell.ped, 'sell', 'vhs-recycle:interactsell', 'fas fa-hand', 'Sell Items', nil, nil, interact,  job, gang, 1.5)
 
-targetBox('outside', depot.outside.zone, {3.5, 5.5}, { { icon = 'fas fa-door-open', label = 'Enter Depot',  action = function(entity) TriggerEvent('vhs-recycle:enter')  end }, }, job, gang, distance, rotation, false)
-targetBox('exit', depot.exit.zone, {1.5, 1.3}, { { icon = 'fas fa-door-open', label = 'Exit Warehouse',  action = function(entity) TriggerEvent('vhs-recycle:exit')  end }, }, job, gang, distance, rotation, false)
-targetBox('duty', depot.duty.zone, {1, 1}, { { icon = 'fas fa-door-open', label = 'Start Working',  action = function(entity) TriggerEvent('vhs-recycle:start')  end }, }, job, gang, distance, rotation, false)
+targetBox('outside', depot.outside.zone, {3.5, 5.5}, { { icon = 'fas fa-door-open', label = 'Enter Depot',  action = function(entity) TriggerEvent('vhs-recycle:enter')  end }, }, job, gang, 1.5, rotation, false)
+targetBox('exit', depot.exit.zone, {1.5, 1.3}, { { icon = 'fas fa-door-open', label = 'Exit Warehouse',  action = function(entity) TriggerEvent('vhs-recycle:exit')  end }, }, job, gang, 1.5, rotation, false)
+targetBox('duty', depot.duty.zone, {1, 1}, { { icon = 'fas fa-door-open', label = 'Start Working',  action = function(entity) TriggerEvent('vhs-recycle:start')  end }, }, job, gang, 1.5, rotation, false)
 
 
 RegisterNetEvent('vhs-recycle:start')
