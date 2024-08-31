@@ -38,9 +38,7 @@ function spawnBin()
     FreezeEntityPosition(binObject, true)
     depot.bin.object = binObject
     table.insert(spawnedProps, binObject)
-
-    targetModel(binModel, 'reecyclebin', 'vhs-recycle:process', 'fas fa-trash-alt', 'Process Items', item, nil, interact, job, gang, distance)
-    
+    targetModel(binModel, 'reecyclebin', 'vhs-recycle:process', 'fas fa-trash-alt', 'Process Items', item, nil, interact, job, gang, 1.5)
 end
 
 Citizen.CreateThread(function()
