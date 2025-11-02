@@ -29,5 +29,5 @@ We’re excited to release our Recycle Job script, developed in response to popu
     
 ## Feedback & Support 
 
-If you have any feedback or issues, please reach out to us at https://discord.gg/CBSSMpmqrK
+If you have any feedback or issues, please reach out to us at NEW Discord: https://discord.gg/9FszFQwdVt
 
